@@ -31,7 +31,7 @@ namespace AWsecretary.Services
         {
             _logger.LogInformation("NotificationHostedService started.");
 
-// 初始化 FirebaseApp（只做一次）
+            // 初始化 FirebaseApp（只做一次）
             try
             {
                 InitializeFirebaseIfNeeded();

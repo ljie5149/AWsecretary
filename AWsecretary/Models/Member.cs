@@ -11,15 +11,19 @@ namespace AWsecretary.Models
         [Column("nid")]
         public int Nid { get; set; }
 
-        [Required]
+        // 由系統自動設定，不需使用者填寫
+        [ScaffoldColumn(false)]
         [MaxLength(20)]
         [Column("sid")]
         public string Sid { get; set; } = null!;
 
-        [Required]
+        // 由系統自動設定，不需使用者填寫
+        [ScaffoldColumn(false)]
         [Column("create_date")]
         public DateTime CreateDate { get; set; }
 
+        // 由系統自動設定，不需使用者填寫
+        [ScaffoldColumn(false)]
         [Column("modify_date")]
         public DateTime? ModifyDate { get; set; }
 
@@ -27,12 +31,12 @@ namespace AWsecretary.Models
         [Column("parent_mid")]
         public string? ParentMid { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "請輸入會員編號")]
         [MaxLength(20)]
         [Column("mid")]
         public string Mid { get; set; } = null!;
 
-        [Required]
+        [Required(ErrorMessage = "請輸入密碼")]
         [MaxLength(16)]
         [Column("pwd")]
         public string Pwd { get; set; } = null!;

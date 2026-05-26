@@ -39,7 +39,7 @@ builder.Services.AddSwaggerGen(c =>
 var cs = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // 宣告資料庫健康狀態狀態物件
-var dbHealth = new DatabaseHealth { IsDatabaseAvailable = true };
+var dbHealth = new DatabaseHealth { IsDatabaseConnectOK = true, IsDatabaseAvailable = true };
 ServerVersion serverVersion = null;
 
 try
@@ -53,7 +53,7 @@ catch (Exception ex)
     var logger = loggerFactory.CreateLogger("Startup");
     logger.LogWarning(ex, "MySQL connection auto-detect failed於啟動階段。將於頁面提示資料庫不可用。");
 
-    dbHealth.IsDatabaseAvailable = false;
+    dbHealth.IsDatabaseConnectOK = false;
 
     // Fallback: 假定一個預設版本以利 DbContext 註冊，避免 DI 容器在建立時崩潰，但實際上不啟用 InMemory DB 混淆行為
     serverVersion = new MySqlServerVersion(new Version(8, 0, 35));
@@ -88,6 +88,35 @@ builder.Services.AddHostedService<NotificationHostedService>();
 
 var app = builder.Build();
 
+// ====== 新增：啟動後立即檢查資料庫是否可連線，若不可則設定 dbHealth 並記錄 ======
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var loggerFactory = services.GetService<ILoggerFactory>();
+    var logger = loggerFactory?.CreateLogger("Startup");
+
+    try
+    {
+        var db = services.GetRequiredService<ApplicationDbContext>();
+        // Database.CanConnect 會嘗試以目前連線字串連線資料庫（若資料庫不存在或無法連線會回傳 false）
+        if (!db.Database.CanConnect())
+        {
+            dbHealth.IsDatabaseAvailable = false;
+            logger?.LogWarning("資料庫不可連線。應顯示 DatabaseUnavailable 頁面。");
+        }
+        else
+        {
+            dbHealth.IsDatabaseAvailable = true;
+        }
+    }
+    catch (Exception ex)
+    {
+        dbHealth.IsDatabaseAvailable = false;
+        logger?.LogError(ex, "檢查資料庫連線時發生例外，將顯示 DatabaseUnavailable 頁面。");
+    }
+}
+// =====================================================================================
+
 // ==========================================
 // Configure the HTTP request pipeline.
 // ==========================================
@@ -115,7 +144,7 @@ app.UseStaticFiles();
 app.Use(async (context, next) =>
 {
     var health = context.RequestServices.GetService<DatabaseHealth>();
-    if (health != null && !health.IsDatabaseAvailable)
+    if (health != null && !health.IsDatabaseConnectOK)
     {
         var path = context.Request.Path.Value ?? string.Empty;
 

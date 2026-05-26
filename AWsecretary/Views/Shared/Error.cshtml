@@ -1,10 +1,30 @@
 ﻿@model ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = Model.Title ?? "Error";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<h1 class="text-danger">@ViewData["Title"]</h1>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert alert-warning" role="alert" id="db-unavailable-alert">
+        <p>@Model.Message</p>
+
+        <p><strong>建議：</strong></p>
+        <ul>
+            <li>確認資料庫服務已啟動並可接受連線。</li>
+            <li>檢查專案的連線字串（例如 <code>appsettings.json</code>）是否正確。</li>
+            <li>若為開發環境，請確認本機或容器中的 DB 已啟動。</li>
+        </ul>
+
+        <div class="mt-2">
+            <button type="button" class="btn btn-sm btn-primary" id="btn-check">重新檢查連線</button>
+            <a class="btn btn-sm btn-secondary" asp-controller="Home" asp-action="Index">回到首頁</a>
+        </div>
+
+        <div id="db-status" style="display:none;" class="mt-2"></div>
+    </div>
+}
 
 @if (Model.ShowRequestId)
 {
@@ -23,3 +43,40 @@
     For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
     and restarting the app.
 </p>
+
+@section Scripts {
+    <script>
+        (function () {
+            const btn = document.getElementById('btn-check');
+            const statusDiv = document.getElementById('db-status');
+            if (!btn) return;
+
+            async function checkDb() {
+                btn.disabled = true;
+                statusDiv.style.display = '';
+                statusDiv.className = '';
+                statusDiv.textContent = '檢查中…';
+                try {
+                    const resp = await fetch('/dbhealth', { cache: 'no-store' });
+                    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                    const json = await resp.json();
+                    const available = json?.IsDatabaseAvailable ?? json?.isDatabaseAvailable ?? false;
+                    if (available === true) {
+                        statusDiv.className = 'alert alert-success';
+                        statusDiv.textContent = '資料庫已可連線，請重新整理頁面。';
+                    } else {
+                        statusDiv.className = 'alert alert-warning';
+                        statusDiv.textContent = '仍無法連線到資料庫，請稍後再試或聯絡系統管理員。';
+                    }
+                } catch (err) {
+                    statusDiv.className = 'alert alert-danger';
+                    statusDiv.textContent = '檢查時發生錯誤：' + err.message;
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+
+            btn.addEventListener('click', checkDb);
+        })();
+    </script>
+}

@@ -23,10 +23,17 @@ namespace AWsecretary.Controllers
             return View();
         }
 
-        // 資料庫不可用的錯誤頁面（回傳 Views/Shared/DatabaseUnavailable.cshtml）
+        // 資料庫不可用的錯誤頁面（改為回傳 Views/Shared/Error.cshtml，並帶入自訂訊息）
         public IActionResult DatabaseUnavailable()
         {
-            return View("DatabaseUnavailable");
+            var model = new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                Title = "資料庫無法連線",
+                Message = "目前無法連接到資料庫（可能資料庫服務未啟動或連線設定錯誤）。請稍後再試或聯絡系統管理員。"
+            };
+
+            return View("Error", model);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

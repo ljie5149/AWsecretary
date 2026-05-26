@@ -11,5 +11,6 @@ namespace AWsecretary.Responsitories
         Task<IEnumerable<Member>> GetExpiringWithinDaysAsync(int days);
         Task<Member?> GetByResetTokenAsync(string token);
         Task<Member?> GetByEmailAsync(string email);
+        Task<Member?> GetBySidAsync(string sid);
     }
 }

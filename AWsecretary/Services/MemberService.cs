@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 using AWsecretary.Models;
 using AWsecretary.Responsitories;
 using CsvHelper;
@@ -30,9 +31,49 @@ namespace AWsecretary.Services
 
         public async Task CreateAsync(Member member)
         {
+            // 由系統產生唯一 Sid
+            member.Sid = await GenerateUniqueSidAsync();
+
             member.CreateDate = DateTime.UtcNow;
             await _repo.AddAsync(member);
             await _repo.SaveChangesAsync();
+        }
+
+        private async Task<string> GenerateUniqueSidAsync()
+        {
+            const int maxAttempts = 10;
+            for (int i = 0; i < maxAttempts; i++)
+            {
+                var sid = GenerateSid();
+                var exists = await _repo.GetBySidAsync(sid);
+                if (exists == null)
+                    return sid;
+            }
+
+            // 最後保險回退：使用 GUID 保證唯一
+            return Guid.NewGuid().ToString("N").ToUpperInvariant();
+        }
+
+        private static string GenerateSid()
+        {
+            // 產生 10 位元的大寫英數字 Sid（高機率唯一，發生碰撞時會重試）
+            const string chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            Span<byte> buf = stackalloc byte[8];
+            RandomNumberGenerator.Fill(buf);
+            ulong val = BitConverter.ToUInt64(buf);
+            var sb = new StringBuilder(10);
+            for (int i = 0; i < 10; i++)
+            {
+                sb.Append(chars[(int)(val % (uint)chars.Length)]);
+                val /= (uint)chars.Length;
+                if (val == 0)
+                {
+                    // 填補剩餘位數
+                    var rnd = RandomNumberGenerator.GetInt32(chars.Length);
+                    sb.Append(chars[rnd]);
+                }
+            }
+            return sb.ToString();
         }
 
         public async Task DeleteAsync(int nid)
@@ -81,6 +122,10 @@ namespace AWsecretary.Services
                 }
                 else
                 {
+                    // 若匯入資料沒有 Sid，則系統產生 Sid
+                    if (string.IsNullOrEmpty(r.Sid))
+                        r.Sid = await GenerateUniqueSidAsync();
+
                     await _repo.AddAsync(r);
                 }
             }

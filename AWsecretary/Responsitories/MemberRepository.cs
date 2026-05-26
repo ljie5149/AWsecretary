@@ -44,6 +44,12 @@ namespace AWsecretary.Responsitories
             return await _db.Members.AsNoTracking().FirstOrDefaultAsync(m => m.Mid == mid);
         }
 
+        public async Task<Member?> GetBySidAsync(string sid)
+        {
+            if (string.IsNullOrEmpty(sid)) return null;
+            return await _db.Members.AsNoTracking().FirstOrDefaultAsync(m => m.Sid == sid);
+        }
+
         public async Task<IEnumerable<Member>> GetChildrenAsync(string parentMid)
         {
             return await _db.Members.AsNoTracking()

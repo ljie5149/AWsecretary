@@ -163,6 +163,8 @@ CREATE TABLE IF NOT EXISTS `data_member` (
   `parent_mid` VARCHAR(20) NULL COMMENT '上線會員帳號',
   `mid` VARCHAR(20) NOT NULL COMMENT '會員帳號;;英數字組合;;20' UNIQUE,
   `pwd` VARCHAR(16) NOT NULL COMMENT '密碼;;英數字組合;;16',
+  `password_reset_token` VARCHAR(100) NULL COMMENT '重設密碼 token',
+  `password_reset_expiry` DATETIME NULL COMMENT '重設密碼到期時間',
   `join_date` DATETIME NULL COMMENT '加入日期',
   `continue_date` DATETIME NULL COMMENT '續約日期',
   `real_continue_date` DATETIME NULL COMMENT '實際續約日期',
@@ -247,7 +249,7 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-// 【Middleware 1】啟動時資料庫即不可用的攔截 (必須放在 UseRouting 之前)
+// 【Middleware 1】啟動時資料庫不可用的攔截（改為在每個 request 發生時短暫重試連線）
 app.Use(async (context, next) =>
 {
     var health = context.RequestServices.GetService<DatabaseHealth>();
@@ -255,7 +257,7 @@ app.Use(async (context, next) =>
     {
         var path = context.Request.Path.Value ?? string.Empty;
 
-        // 排除靜態資源、swagger、api、dbhealth、以及 DatabaseUnavailable(兩種路徑) 本身
+        // 排除靜態資源、swagger、api、dbhealth、以及 DatabaseUnavailable 本身
         var isStatic = path.Contains('.') || path.StartsWith("/_framework") || path.StartsWith("/lib") ||
                        path.StartsWith("/css") || path.StartsWith("/js") || path.StartsWith("/images");
         var isSwagger = path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase);
@@ -266,11 +268,33 @@ app.Use(async (context, next) =>
 
         if (!isTargetPage && !isSwagger && !isApi && !isStatic && !isDbHealth)
         {
-            // 導向 MVC 的錯誤 action（你已將 view 放在 Views/Shared，Controller action 為 Home/DatabaseUnavailable）
+            // 嘗試再次短暫檢查資料庫（避免每次都做重試造成大量開銷）
+            try
+            {
+                using var scope = context.RequestServices.CreateScope();
+                var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
+                if (db != null)
+                {
+                    // 快速檢查一次，如果成功就更新全域狀態並放行
+                    if (db.Database.CanConnect())
+                    {
+                        health.IsDatabaseAvailable = true;
+                        await next();
+                        return;
+                    }
+                }
+            }
+            catch
+            {
+                // 忽略例外，維持不可用狀態
+            }
+
+            // 尚不可用：導向 DatabaseUnavailable 頁面
             context.Response.Redirect("/Home/DatabaseUnavailable");
             return;
         }
     }
+
     await next();
 });
 
@@ -298,6 +322,7 @@ app.Use(async (context, next) =>
         throw;
     }
 });
+
 
 // 路由與身分驗證群組
 app.UseRouting();

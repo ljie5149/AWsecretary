@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using MySqlConnector;
 using System;
 using System.IO;
 using System.Reflection;
@@ -99,7 +100,8 @@ builder.Services.AddHostedService<NotificationHostedService>();
 
 var app = builder.Build();
 
-// ====== 新增：啟動後立即檢查資料庫是否可連線，若不可則設定 dbHealth 並記錄 ======
+bool fAutoCreateDataBase = true; // 自動建立資料庫（開發環境專用，生產環境請確保資料庫已存在）
+// ====== 修改：啟動後立即檢查資料庫是否可連線，若不可且 fAutoCreateDataBase==true，嘗試建立資料庫與 data_member 表 ======
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -109,11 +111,105 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var db = services.GetRequiredService<ApplicationDbContext>();
-        // Database.CanConnect 會嘗試以目前連線字串連線資料庫（若資料庫不存在或無法連線會回傳 false）
+
         if (!db.Database.CanConnect())
         {
-            dbHealth.IsDatabaseAvailable = false;
-            logger?.LogWarning("資料庫不可連線。應顯示 DatabaseUnavailable 頁面。");
+            if (!fAutoCreateDataBase)
+            {
+                dbHealth.IsDatabaseAvailable = false;
+                logger?.LogWarning("資料庫不可連線。fAutoCreateDataBase=false，將顯示 DatabaseUnavailable 頁面。");
+            }
+            else
+            {
+                logger?.LogWarning("資料庫不可連線，fAutoCreateDataBase=true，開始嘗試建立資料庫與 data_member 表...");
+
+                try
+                {
+                    // 先以 MySqlConnectionStringBuilder 取得資料庫名稱並建立資料庫（若不存在）
+                    var csBuilder = new MySqlConnectionStringBuilder(cs);
+                    var dbName = csBuilder.Database ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(dbName))
+                    {
+                        throw new InvalidOperationException("Connection string 未包含資料庫名稱（Database）。無法自動建立資料庫。");
+                    }
+
+                    // 以不帶 Database 的連線字串連接 MySQL 伺服器，建立 database
+                    csBuilder.Database = string.Empty;
+                    var serverOnlyCs = csBuilder.ConnectionString;
+
+                    using (var serverConn = new MySqlConnection(serverOnlyCs))
+                    {
+                        serverConn.Open();
+                        using var cmd = serverConn.CreateCommand();
+                        cmd.CommandText = $"CREATE DATABASE IF NOT EXISTS `{dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;";
+                        cmd.ExecuteNonQuery();
+                        logger?.LogInformation("資料庫 `{Db}` 已存在或建立完成。", dbName);
+                    }
+
+                    // 重新嘗試連線並套用 migration（若有）或直接建立 table
+                    try
+                    {
+                        db.Database.Migrate();
+                        logger?.LogInformation("套用 EF migration 成功。");
+                        dbHealth.IsDatabaseAvailable = db.Database.CanConnect();
+
+                        // 建立 data_member 表的 SQL（使用 IF NOT EXISTS 並明確指定 utf8mb4）
+                        var createTableSql = @"
+CREATE TABLE IF NOT EXISTS `data_member` (
+  `nid` INT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '流水號',
+  `sid` VARCHAR(20) NOT NULL COMMENT '序號' UNIQUE,
+  `create_date` DATETIME NOT NULL COMMENT '建立日期',
+  `modify_date` DATETIME NULL COMMENT '最後更新日期',
+  `parent_mid` VARCHAR(20) NULL COMMENT '上線會員帳號',
+  `mid` VARCHAR(20) NOT NULL COMMENT '會員帳號;;英數字組合;;20' UNIQUE,
+  `pwd` VARCHAR(16) NOT NULL COMMENT '密碼;;英數字組合;;16',
+  `join_date` DATETIME NULL COMMENT '加入日期',
+  `continue_date` DATETIME NULL COMMENT '續約日期',
+  `real_continue_date` DATETIME NULL COMMENT '實際續約日期',
+  `hint_days` INT(5) NOT NULL DEFAULT 30 COMMENT '提前幾天提醒',
+  `birthday` DATETIME NULL COMMENT '生日',
+  `name` VARCHAR(50) NULL COMMENT '名稱;;;;100',
+  `eng_name` VARCHAR(50) NULL COMMENT '英文名;;非必要欄位;;50',
+  `head_img` VARCHAR(255) NULL COMMENT '相片',
+  `iden` VARCHAR(255) NULL COMMENT '身份證字號加密',
+  `cmp_code` VARCHAR(10) NULL COMMENT '公司統編;;數字;;10',
+  `role` VARCHAR(3) NULL COMMENT '角色',
+  `authorization_page` VARCHAR(100) NOT NULL COMMENT '授權可視頁面',
+  `address` VARCHAR(500) NULL COMMENT '地址;;;;500',
+  `mobile` VARCHAR(20) NULL COMMENT '手機;;09xx123456或09xx-123-456;;20',
+  `tel` VARCHAR(20) NULL COMMENT '電話;;(02)xx123456或(02)1234-5678;;20',
+  `fax` VARCHAR(20) NULL COMMENT '傳真(Fax);;(02)xx123456或(02)1234-5678;;20',
+  `email` VARCHAR(100) NULL COMMENT '電子信箱;;jacky@jotangi.com;;100',
+  `avalible` VARCHAR(2) NOT NULL COMMENT '狀態',
+  `start_date` DATETIME NULL COMMENT '生效日期',
+  `signature_pic` VARCHAR(255) NULL COMMENT '簽名圖檔',
+  `advertising_id` VARCHAR(200) NULL COMMENT '廣告ID',
+  `device_id` VARCHAR(200) NULL COMMENT '裝置ID',
+  `fcm_token` TEXT NULL COMMENT '推播token',
+  `priority` INT(5) NULL COMMENT '權限;;暫時無作用;;5',
+  `edit_sid` VARCHAR(20) NULL COMMENT '編輯人員',
+  `cur_coupon` INT(10) NULL COMMENT '目前折價券',
+  `cur_point` INT(10) NULL COMMENT '目前點數',
+  `script` TEXT NULL COMMENT '說明',
+  `remark` TEXT NULL COMMENT '備註'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='會員資料表';";
+
+                        // 執行建表 SQL
+                        db.Database.ExecuteSqlRaw(createTableSql);
+                    }
+                    catch (Exception migEx)
+                    {
+                        logger?.LogWarning(migEx, "套用 migration 失敗，改以執行建表 SQL 建立 data_member 表。");
+                        logger?.LogInformation("data_member 表已建立或存在。");
+                        dbHealth.IsDatabaseAvailable = db.Database.CanConnect();
+                    }
+                }
+                catch (Exception createEx)
+                {
+                    dbHealth.IsDatabaseAvailable = false;
+                    logger?.LogError(createEx, "自動建立資料庫或 data_member 表時發生錯誤。");
+                }
+            }
         }
         else
         {
@@ -123,7 +219,7 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         dbHealth.IsDatabaseAvailable = false;
-        logger?.LogError(ex, "檢查資料庫連線時發生例外，將顯示 DatabaseUnavailable 頁面。");
+        logger?.LogError(ex, "檢查或建立資料庫時發生錯誤");
     }
 }
 // =====================================================================================

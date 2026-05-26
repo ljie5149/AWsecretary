@@ -53,6 +53,9 @@ namespace AWsecretary.Models
         [Column("hint_days")]
         public int HintDays { get; set; } = 30;
 
+        [Column("birthday")]
+        public DateTime? Birthday { get; set; }
+
         [MaxLength(50)]
         [Column("name")]
         public string? Name { get; set; }

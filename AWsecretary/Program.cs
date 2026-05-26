@@ -1,20 +1,31 @@
+using AWsecretary.Data;
+using AWsecretary.Models;
+using AWsecretary.Responsitories;
+using AWsecretary.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
-using AWsecretary.Data;
-using AWsecretary.Responsitories;
-using AWsecretary.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+// 讀取版本：優先使用 appsettings.json 的 App:Version，否則退回到 assembly 資訊
+var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+var version = builder.Configuration.GetValue<string>("App:Version")
+              ?? assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+              ?? assembly.GetName().Version?.ToString()
+              ?? "0.0.0";
+
+// 把版本注入 DI，方便 Razor 頁面或 Controller 使用
+builder.Services.AddSingleton(new AppInfo { Version = version });
 
 // Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -120,8 +131,8 @@ using (var scope = app.Services.CreateScope())
 // ==========================================
 // Configure the HTTP request pipeline.
 // ==========================================
-
-if (app.Environment.IsDevelopment())
+bool fAlwaysSwagger = true; // 強制在任何環境都啟用 Swagger（開發或生產）
+if (app.Environment.IsDevelopment() || fAlwaysSwagger)
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
@@ -144,7 +155,7 @@ app.UseStaticFiles();
 app.Use(async (context, next) =>
 {
     var health = context.RequestServices.GetService<DatabaseHealth>();
-    if (health != null && !health.IsDatabaseConnectOK)
+    if (health != null && !health.IsDatabaseAvailable)
     {
         var path = context.Request.Path.Value ?? string.Empty;
 

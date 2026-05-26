@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "資料庫無法連線";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="alert alert-warning">
+    目前無法連接到資料庫（可能資料庫服務未啟動或連線設定錯誤）。<br />
+    請稍後再試，或聯絡系統管理員檢查資料庫連線設定。
+</div>
+
+<p>
+    回到首頁： <a asp-controller="Home" asp-action="Index">Home</a>
+</p>

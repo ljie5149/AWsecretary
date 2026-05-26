@@ -1,0 +1,59 @@
+@model AWsecretary.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "·|­ûµù¥U";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<form asp-action="Register" method="post" class="mb-3">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-2">
+        <label asp-for="Mid" class="form-label"></label>
+        <input asp-for="Mid" class="form-control" />
+        <span asp-validation-for="Mid" class="text-danger"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="Pwd" class="form-label"></label>
+        <input asp-for="Pwd" type="password" class="form-control" />
+        <span asp-validation-for="Pwd" class="text-danger"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="Mobile" class="form-label"></label>
+        <input asp-for="Mobile" class="form-control" />
+        <span asp-validation-for="Mobile" class="text-danger"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="ParentMid" class="form-label"></label>
+        <input asp-for="ParentMid" class="form-control" />
+        <span asp-validation-for="ParentMid" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">µù¥U</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

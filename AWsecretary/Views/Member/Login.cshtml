@@ -1,0 +1,37 @@
+@model AWsecretary.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "會員登入";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Login" method="post" class="mb-3">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="returnUrl" value="@returnUrl" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-2">
+        <label asp-for="Mid" class="form-label">會員帳號</label>
+        <input asp-for="Mid" class="form-control" />
+        <span asp-validation-for="Mid" class="text-danger"></span>
+    </div>
+
+    <div class="mb-2">
+        <label asp-for="Pwd" class="form-label">密碼</label>
+        <input asp-for="Pwd" type="password" class="form-control" />
+        <span asp-validation-for="Pwd" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">登入</button>
+</form>
+
+<form asp-action="Logout" method="post" class="mt-3">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-link">登出（示範）</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

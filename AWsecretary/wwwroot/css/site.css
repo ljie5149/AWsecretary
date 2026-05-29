@@ -1,22 +1,320 @@
+/* ==========================================================================
+   1. 基礎設定與字體
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", serif;
+}
+
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+
+/* ==========================================================================
+   2. 側邊欄主體與標頭佈局
+   ========================================================================== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100vh;
+    background: #151A2E;
+    transition: all 0.4s ease;
+    z-index: 1000;
+}
+
+    .sidebar.collapsed {
+        width: 85px;
+    }
+
+    /* 確保標頭定位為相對基準 */
+    .sidebar .sidebar-header {
+        display: flex;
+        align-items: center;
+        padding: 25px 20px;
+        justify-content: space-between;
+        position: relative;
+    }
+
+
+/* ==========================================================================
+   3. 收合按鈕 (Sidebar Toggler) 控制
+   ========================================================================== */
+/* 【開啟時】：按鈕固定在 header 右側，與 Logo 保持在同一列 */
+.sidebar-header .sidebar-toggler {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%); /* 垂直居中 */
+    height: 35px;
+    width: 35px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #EEF2FF;
+    transition: all 0.4s ease;
+    z-index: 10;
+}
+
+    .sidebar-header .sidebar-toggler:hover {
+        background: #d9e1fd;
+    }
+
+/* 【收合時】：按鈕移至下一列，與上方 Logo 保持 85px 的舒適 top 距離 */
+.sidebar.collapsed .sidebar-header .sidebar-toggler {
+    top: 0;
+    transform: translate(-4px, 85px) rotate(180deg) !important;
+}
+
+.sidebar-header .sidebar-toggler span {
+    font-size: 1.25rem;
+    color: #151A2E;
+    display: inline-block;
+    line-height: 1;
+}
+
+
+/* ==========================================================================
+   4. 導覽列與項目的 MVC 適配（包含收合時圖示水平置中、清單下移）修正版
+   ========================================================================== */
+.sidebar-nav {
+    transition: all 0.4s ease;
+}
+
+/* 【收合時關鍵修正】：調小上方間距，讓第一項目緊跟在 Toggler 下方 */
+.sidebar.collapsed .sidebar-nav {
+    margin-top: 60px;
+}
+
+/* 清單大項目與列表的垂直佈局 */
+.sidebar-nav .nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 15px;
+    transition: padding 0.4s ease; /* 讓縮放時的過渡更平滑 */
+}
+
+/* 【關鍵修正】：當側邊欄收合時，把外層清單的左右內距縮小，留更多空間給 icon 置中 */
+.sidebar.collapsed .sidebar-nav .nav-list {
+    padding: 0 8px;
+}
+
+/* 清單項目基礎樣式 */
+.sidebar-nav .nav-item .nav-link {
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 15px;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.4s ease;
+    white-space: nowrap;
+    width: 100%; /* 預設撐滿 */
+}
+
+/* 確保圖示（Icon）在開啟與收合時的大小一致，且在自身框架內置中 */
+.sidebar-nav .nav-link .bi {
+    font-size: 1.25rem;
+    min-width: 24px;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+/* 【核心完美修正】：收合時讓 nav-link 的排版變成純置中 */
+.sidebar.collapsed .sidebar-nav .nav-item .nav-link {
+    justify-content: center !important; /* Flex 水平置中 */
+    padding: 11px 0 !important; /* 【超重要】：左右 Padding 必須歸零！全靠 justify-content 居中 */
+    gap: 0 !important; /* 消除文字產生的間距，避免 icon 被往左推 */
+}
+
+/* 項目文字與下拉選單小箭頭的動畫基準 */
+.sidebar-nav .nav-link .nav-label {
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 【收合時】：文字完全隱藏，達到「只剩項目圖示」的效果 */
+.sidebar.collapsed .nav-link .nav-label {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    width: 0;
+    overflow: hidden;
+    margin: 0;
+}
+
+/* 作用中狀態 (Active) */
+.sidebar-nav .nav-item.active > .nav-link,
+.sidebar-nav .nav-item:hover > .nav-link {
+    color: #151A2E !important;
+    background: #EEF2FF !important;
+}
+
+
+/* ==========================================================================
+   5. 下拉選單動畫與狀態切換控制（終極修正收合 Hover 只顯示一項、高度被鎖死問題）
+   ========================================================================== */
+.sidebar-nav .nav-item {
+    position: relative; /* 確保收合懸浮時以各自的項目為絕對定位基準 */
+}
+
+/* 展開狀態下，手寫的 V 符號小箭頭基本樣式 */
+.sidebar-nav .dropdown-container .dropdown-icon {
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    opacity: 1;
+    visibility: visible;
+    margin-left: auto; /* 展開時自動推到最右側 */
+}
+
+/* 【關鍵修正】：當側邊欄收合時，把開合的 V 符號徹底拔掉，不占空間，確保主圖示完美置中 */
+.sidebar.collapsed .dropdown-container .dropdown-icon {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    margin: 0 !important;
+}
+
+/* 【關鍵新增】：徹底消滅 Bootstrap 內建在 .dropdown-toggle 上的實心三角形 (▼) */
+.sidebar .nav-link.dropdown-toggle::after,
+.sidebar.collapsed .dropdown-toggle::after {
+    display: none !important;
+    content: none !important;
+    border: none !important;
+}
+
+/* 【預設展開狀態下】的子選單樣式 */
+.sidebar-nav .dropdown-menu {
+    position: relative;
+    width: 100%;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.4s ease;
+    display: block;
+    background: transparent;
+    border: none;
+    list-style: none;
+    padding-left: 15px;
+    margin: 0;
+}
+
+/* 當選單展開時，旋轉下拉小箭頭 */
+.sidebar .dropdown-container.open .dropdown-icon {
+    transform: rotate(180deg);
+}
+
+/* 展開狀態下，子選單內部項目的間距微調 */
+.sidebar-nav .dropdown-menu .nav-item .nav-link {
+    padding: 9px 15px;
+    color: #b5b8c4;
+}
+
+.sidebar-nav .dropdown-menu .nav-item:hover .nav-link,
+.sidebar-nav .dropdown-menu .nav-item.active .nav-link {
+    color: #151A2E !important;
+    background: #EEF2FF !important;
+}
+
+/* ==========================================
+   【關鍵修正】：側邊欄收合時的右側彈出選單
+   ========================================== */
+.sidebar.collapsed .dropdown-container .dropdown-menu {
+    position: absolute;
+    left: 100%; /* 定位在縮小版側邊欄的最右側外面 */
+    top: 0;
+    width: 180px; /* 設定彈出清單的寬度 */
+    /* 終極高度解放：徹底擊碎 JS 的行內高度限制 */
+    height: auto !important;
+    max-height: 9999px !important;
+    overflow: visible !important; /* 防止內容被切掉 */
+
+    background: #151A2E; /* 保持與側邊欄相同底色 */
+    border-radius: 0 8px 8px 0;
+    padding: 8px 0; /* 上下留點呼吸空間，左右歸零靠 nav-link 撐開 */
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+    list-style: none;
+    z-index: 2000; /* 確保不會被右側主畫面內容遮擋 */
+    /* 預設隱藏動畫 */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+}
+
+/* 當收合且滑鼠懸停在項目上時，秀出整個右側子清單 */
+.sidebar.collapsed .dropdown-container:hover .dropdown-menu {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(0) !important;
+}
+
+/* 懸浮彈出清單內項目的排版重設：強制它們垂直排列，不准橫向擠壓 */
+.sidebar.collapsed .dropdown-menu .nav-item {
+    width: 100% !important;
+    display: block !important; /* 強制阻斷 Flex 橫向排列 */
+    float: none !important;
+}
+
+    .sidebar.collapsed .dropdown-menu .nav-item .nav-link {
+        color: #fff !important;
+        background: transparent !important;
+        justify-content: flex-start !important; /* 文字絕對靠左對齊 */
+        padding: 10px 20px !important; /* 給子項目舒適的點擊寬度 */
+        display: flex !important;
+        width: 100% !important;
+        white-space: nowrap !important; /* 防止文字斷行 */
+    }
+
+    /* 子項目懸停效果 */
+    .sidebar.collapsed .dropdown-menu .nav-item:hover .nav-link {
+        color: #151A2E !important;
+        background: #EEF2FF !important;
+    }
+
+/* 隱藏彈出選單中的重複大標題 */
+.sidebar.collapsed .dropdown-menu .dropdown-title {
+    display: none !important;
+}
+
+
+/* ==========================================================================
+   6. 手機版響應式適配
+   ========================================================================== */
+@media (max-width: 768px) {
+    .sidebar.collapsed {
+        width: 260px;
+        left: -260px;
+    }
 }

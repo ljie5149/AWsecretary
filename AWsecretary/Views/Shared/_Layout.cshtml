@@ -1,79 +1,144 @@
-﻿@inject AWsecretary.Models.AppInfo AppInfo
-<!DOCTYPE html>
-<html lang="en">
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - AWsecretary</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/AWsecretary.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AWsecretary</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
 
-                    <ul class="navbar-nav ms-auto">
-                        @if (!(User?.Identity?.IsAuthenticated ?? false))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Member" asp-action="Login">登入</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Member" asp-action="Register">註冊</a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-dark" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    @User.Identity.Name
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                    <li class="px-3 py-2">
-                                        <form asp-controller="Member" asp-action="Logout" method="post" class="m-0">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-link p-0">登出</button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </li>
-                        }
+    <button class="sidebar-menu-button">
+        <span class="bi bi-list"></span>
+    </button>
+
+    <aside class="sidebar">
+        <header class="sidebar-header">
+            <a asp-controller="Home" asp-action="Index" class="header-logo">
+                <img src="https://res.cloudinary.com/zenbusiness/image/upload/v1670445040/logaster/logaster-2013-06-jpg.png"
+                     alt="Logo"
+                     style="width: 46px; height: 46px; display: block; object-fit: contain; border-radius: 50%;" />
+            </a>
+            <button class="sidebar-toggler">
+                <span class="bi bi-chevron-left"></span>
+            </button>
+        </header>
+
+        <nav class="sidebar-nav">
+            <ul class="nav-list primary-nav">
+                <li class="nav-item @(IsActive("Home", "Index") ? "active" : "")">
+                    <a asp-controller="Home" asp-action="Index" class="nav-link">
+                        <span class="bi bi-grid-1x2"></span>
+                        <span class="nav-label">首頁備忘錄</span>
+                    </a>
+                </li>
+
+                @{
+                    // 檢查目前的 Controller 是否為 Member
+                    bool isMemberController = ViewContext.RouteData.Values["Controller"]?.ToString() == "Member";
+                }
+                <li class="nav-item dropdown-container @(isMemberController ? "open" : "")" data-default-open="@(isMemberController ? "true" : "false")">
+                    <a href="#" class="nav-link dropdown-toggle">
+                        <span class="bi bi-person"></span>
+                        <span class="nav-label">會員管理</span>
+                        <span class="bi bi-chevron-down dropdown-icon"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-title">會員管理</a>
+                        </li>
+                        <li class="nav-item @(IsActive("Member", "List") ? "active" : "")">
+                            <a asp-controller="Member" asp-action="List" class="nav-link dropdown-link">會員列表</a>
+                        </li>
                     </ul>
-                </div>
-            </div>
+                </li>
+            </ul>
+
+            <ul class="nav-list secondary-nav">
+                <li class="nav-item">
+                    <a asp-controller="Home" asp-action="Support" class="nav-link">
+                        <span class="bi bi-gear"></span>
+                        <span class="nav-label">Support</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-controller="Account" asp-action="SignOut" class="nav-link">
+                        <span class="bi bi-box-arrow-left"></span>
+                        <span class="nav-label">Sign Out</span>
+                    </a>
+                </li>
+            </ul>
         </nav>
-    </header>
-    <div class="container">
+    </aside>
+
+    <div class="main-content">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            <span class="text-muted">版本：(@AppInfo.Version) - </span>
-            &copy; 2026 - AWsecretary - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // 切換下拉選單的顯示狀態與計算動態高度
+        const toggleDropdown = (dropdown, menu, isOpen) => {
+            dropdown.classList.toggle("open", isOpen);
+            menu.style.height = isOpen ? `${menu.scrollHeight}px` : 0;
+        }
+
+        // 關閉所有開啟的下拉選單
+        const closeAllDropdowns = () => {
+            document.querySelectorAll(".dropdown-container.open").forEach(openDropdown => {
+                toggleDropdown(openDropdown, openDropdown.querySelector(".dropdown-menu"), false);
+            });
+        }
+
+        // 為所有下拉選單綁定點擊事件
+        document.querySelectorAll(".dropdown-toggle").forEach(dropdownToggle => {
+            dropdownToggle.addEventListener("click", e => {
+                e.preventDefault();
+                const dropdown = e.target.closest(".dropdown-container");
+                const menu = dropdown.querySelector(".dropdown-menu");
+                const isOpen = dropdown.classList.contains("open");
+
+                // 關閉其他選單
+                closeAllDropdowns();
+                // 切換當前選單狀態
+                toggleDropdown(dropdown, menu, !isOpen);
+            });
+        });
+
+        // 為側邊欄收合與手機版選單按鈕綁定事件
+        document.querySelectorAll(".sidebar-toggler, .sidebar-menu-button").forEach(button => {
+            button.addEventListener("click", () => {
+                closeAllDropdowns();
+                document.querySelector(".sidebar").classList.toggle("collapsed");
+            });
+        });
+
+        // 【關鍵修復】：頁面首次載入時，如果 MVC 判定該選單預設是開的，重新依據實際內容計算高度展開
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".dropdown-container").forEach(dropdown => {
+                if (dropdown.getAttribute("data-default-open") === "true") {
+                    const menu = dropdown.querySelector(".dropdown-menu");
+                    toggleDropdown(dropdown, menu, true);
+                }
+            });
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+@functions {
+    // 輔助函式：精準判斷是否為目前頁面路徑
+    bool IsActive(string c, string a) =>
+        ViewContext.RouteData.Values["Controller"]?.ToString() == c &&
+        ViewContext.RouteData.Values["Action"]?.ToString() == a;
+}

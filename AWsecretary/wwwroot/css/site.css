@@ -359,6 +359,109 @@ body {
 }
 
 /* ==========================================================================
+   7. 新增頂部列 Topbar 樣式
+   ========================================================================== */
+.topbar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: var(--sidebar-width, 260px); /* 寬度根據側邊欄動態調整 */
+    height: 70px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 999; /* 略低於側邊欄的 1000 */
+    transition: left 0.4s ease;
+}
+
+/* 當側邊欄收合時，頂部列要自動向左延展 */
+.sidebar.collapsed ~ .topbar {
+    left: 85px;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+}
+
+/* 重新定位頂部列內的漢堡排按鈕 */
+.topbar .sidebar-menu-button {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+    .topbar .sidebar-menu-button:hover {
+        background: #f1f5f9;
+    }
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* ==========================================
+   未登入狀態：連結字體樣式設計
+   ========================================== */
+.auth-links {
+    display: flex;
+    align-items: center;
+    gap: 24px; /* 登入與註冊之間的間距 */
+}
+
+.auth-link {
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+    /* 登入連結：灰色 */
+    .auth-link.link-signin {
+        color: #64748b; /* 質感深灰色 */
+    }
+
+        .auth-link.link-signin:hover {
+            color: #1e293b; /* 懸停時顏色加深 */
+        }
+
+    /* 註冊連結：藍色加底線 */
+    .auth-link.link-signup {
+        color: #2563eb; /* 科技感主題藍 */
+        text-decoration: underline;
+        text-underline-offset: 4px; /* 讓底線跟文字有點呼吸空間 */
+    }
+
+        .auth-link.link-signup:hover {
+            color: #1d4ed8; /* 懸停時藍色加深 */
+        }
+
+/* ==========================================
+   調整主內容區與手機版適配
+   ========================================== */
+/* 主內容區因為上方多了 Topbar，必須加上 padding-top 避免內容被遮擋 */
+.main-content {
+    padding-top: calc(70px + 24px) !important; /* 70px頂部列高度 + 24px留白 */
+}
+
+@media (max-width: 768px) {
+    .topbar {
+        left: 0 !important; /* 手機版頂部列滿版 */
+    }
+}
+/* ==========================================================================
    主內容(Main) 與側邊欄的同步位移控制（新增）
    - 利用相鄰選擇子讓 main-content 隨 .sidebar 的寬度改變
    - 保留平滑過渡且在小螢幕下恢復為覆蓋模式

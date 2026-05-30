@@ -10,7 +10,31 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
+    <header class="topbar">
+        <div class="topbar-left">
+        </div>
 
+        <div class="topbar-right">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="user-notifications">
+                    <span class="bi bi-bell badge-notification"></span>
+                </div>
+                <div class="user-profile">
+                    <img src="https://via.placeholder.com/32" alt="Avatar" class="avatar" />
+                    <span class="username">Admin</span>
+                    <span class="bi bi-chevron-down text-muted"></span>
+                </div>
+            }
+            else
+            {
+                <div class="auth-links">
+                    <a asp-controller="Account" asp-action="SignIn" class="auth-link link-signin">登入</a>
+                    <a asp-controller="Account" asp-action="SignUp" class="auth-link link-signup">註冊</a>
+                </div>
+            }
+        </div>
+    </header>
     <button class="sidebar-menu-button">
         <span class="bi bi-list"></span>
     </button>

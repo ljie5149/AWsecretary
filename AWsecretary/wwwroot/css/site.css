@@ -308,6 +308,45 @@ body {
     display: none !important;
 }
 
+/* 2. 底部 Footer 基礎樣式 */
+.sidebar-footer {
+    padding: 20px 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: #0f1322; /* 稍深底色創造層次感 */
+    transition: all 0.4s ease; /* 完美配合你 JS 的 0.4s 縮放動畫時間 */
+}
+
+    /* 【展開狀態】預設顯示完整版權文字 */
+    .sidebar-footer .full-copyright {
+        display: block;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+        .sidebar-footer .full-copyright p {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 3px;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+            .sidebar-footer .full-copyright p span {
+                color: #94a3b8;
+                font-weight: 500;
+            }
+
+        .sidebar-footer .full-copyright .version-tag {
+            margin-top: 6px;
+            color: #38bdf8; /* 藍色亮點版本號 */
+            font-weight: 600;
+        }
+
+    /* 【展開狀態】預設隱藏精簡版 */
+    .sidebar-footer .short-copyright {
+        display: none;
+        opacity: 0;
+    }
 
 /* ==========================================================================
    6. 手機版響應式適配
@@ -318,3 +357,76 @@ body {
         left: -260px;
     }
 }
+
+/* ==========================================================================
+   9. 側邊選單底部版本列 (Sidebar Footer)
+   ========================================================================== */
+.sidebar-footer {
+    padding: 20px 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: #0f1322;
+    transition: all 0.4s ease;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+    .sidebar-footer:hover {
+        background: #13192d;
+    }
+
+    .sidebar-footer .full-copyright {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.2s ease;
+    }
+
+        .sidebar-footer .full-copyright p {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 3px;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+            .sidebar-footer .full-copyright p span {
+                color: #94a3b8;
+                font-weight: 500;
+            }
+
+        .sidebar-footer .full-copyright .version-tag {
+            margin-top: 6px;
+            color: #38bdf8;
+            font-weight: 600;
+        }
+
+    .sidebar-footer .short-copyright {
+        display: none;
+        opacity: 0;
+        visibility: hidden;
+    }
+
+/* 縮小收合狀態下的 Footer 樣式切換 */
+.sidebar.collapsed .sidebar-footer {
+    padding: 18px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+    .sidebar.collapsed .sidebar-footer .full-copyright {
+        display: none !important;
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .sidebar.collapsed .sidebar-footer .short-copyright {
+        display: block !important;
+        opacity: 1;
+        visibility: visible;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #38bdf8;
+        letter-spacing: 0.5px;
+    }

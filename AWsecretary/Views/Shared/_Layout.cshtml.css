@@ -31,7 +31,7 @@ a {
 }
 
 .box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+  box-shadow: 0 .25rem .0.75rem rgba(0, 0, 0, .05);
 }
 
 button.accept-policy {
@@ -45,4 +45,52 @@ button.accept-policy {
   width: 100%;
   white-space: nowrap;
   line-height: 60px;
+}
+
+/* ---------- Sidebar version styling ---------- */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-top: 1px solid #e9ecef;
+  background: transparent;
+  min-height: 56px;
+}
+
+/* 展開時顯示完整版（例如 "Version 1.0.0"）*/
+.sidebar .sidebar-footer .full-copyright {
+  display: block;
+}
+
+/* 收合時顯示簡短版（例如 "1.0.0"）*/
+.sidebar .sidebar-footer .short-copyright {
+  display: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* 當側邊欄被收合（.collapsed）時，反轉顯示狀態 */
+.sidebar.collapsed .sidebar-footer .full-copyright {
+  display: none;
+}
+.sidebar.collapsed .sidebar-footer .short-copyright {
+  display: block;
+}
+
+/* 小螢幕維護顯示一致性 */
+@media (max-width: 576px) {
+  .sidebar-footer {
+    padding: 0.5rem;
+  }
+  .sidebar .sidebar-footer .short-copyright {
+    font-size: 0.9rem;
+  }
 }

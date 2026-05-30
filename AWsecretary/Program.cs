@@ -155,46 +155,279 @@ using (var scope = app.Services.CreateScope())
 
                         // 建立 data_member 表的 SQL（使用 IF NOT EXISTS 並明確指定 utf8mb4）
                         var createTableSql = @"
-CREATE TABLE IF NOT EXISTS `data_member` (
-  `nid` INT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '流水號',
-  `sid` VARCHAR(20) NOT NULL COMMENT '序號' UNIQUE,
-  `create_date` DATETIME NOT NULL COMMENT '建立日期',
-  `modify_date` DATETIME NULL COMMENT '最後更新日期',
-  `parent_mid` VARCHAR(20) NULL COMMENT '上線會員帳號',
-  `mid` VARCHAR(20) NOT NULL COMMENT '會員帳號;;英數字組合;;20' UNIQUE,
-  `pwd` VARCHAR(16) NOT NULL COMMENT '密碼;;英數字組合;;16',
-  `password_reset_token` VARCHAR(100) NULL COMMENT '重設密碼 token',
-  `password_reset_expiry` DATETIME NULL COMMENT '重設密碼到期時間',
-  `join_date` DATETIME NULL COMMENT '加入日期',
-  `continue_date` DATETIME NULL COMMENT '續約日期',
-  `real_continue_date` DATETIME NULL COMMENT '實際續約日期',
-  `hint_days` INT(5) NOT NULL DEFAULT 30 COMMENT '提前幾天提醒',
-  `birthday` DATETIME NULL COMMENT '生日',
-  `name` VARCHAR(50) NULL COMMENT '名稱;;;;100',
-  `eng_name` VARCHAR(50) NULL COMMENT '英文名;;非必要欄位;;50',
-  `head_img` VARCHAR(255) NULL COMMENT '相片',
-  `iden` VARCHAR(255) NULL COMMENT '身份證字號加密',
-  `cmp_code` VARCHAR(10) NULL COMMENT '公司統編;;數字;;10',
-  `role` VARCHAR(3) NULL COMMENT '角色',
-  `authorization_page` VARCHAR(100) NOT NULL COMMENT '授權可視頁面',
-  `address` VARCHAR(500) NULL COMMENT '地址;;;;500',
-  `mobile` VARCHAR(20) NULL COMMENT '手機;;09xx123456或09xx-123-456;;20',
-  `tel` VARCHAR(20) NULL COMMENT '電話;;(02)xx123456或(02)1234-5678;;20',
-  `fax` VARCHAR(20) NULL COMMENT '傳真(Fax);;(02)xx123456或(02)1234-5678;;20',
-  `email` VARCHAR(100) NULL COMMENT '電子信箱;;jacky@jotangi.com;;100',
-  `avalible` VARCHAR(2) NOT NULL COMMENT '狀態',
-  `start_date` DATETIME NULL COMMENT '生效日期',
-  `signature_pic` VARCHAR(255) NULL COMMENT '簽名圖檔',
-  `advertising_id` VARCHAR(200) NULL COMMENT '廣告ID',
-  `device_id` VARCHAR(200) NULL COMMENT '裝置ID',
-  `fcm_token` TEXT NULL COMMENT '推播token',
-  `priority` INT(5) NULL COMMENT '權限;;暫時無作用;;5',
-  `edit_sid` VARCHAR(20) NULL COMMENT '編輯人員',
-  `cur_coupon` INT(10) NULL COMMENT '目前折價券',
-  `cur_point` INT(10) NULL COMMENT '目前點數',
-  `script` TEXT NULL COMMENT '說明',
-  `remark` TEXT NULL COMMENT '備註'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='會員資料表';";
+CREATE TABLE data_member (
+
+    nid                     INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '流水號',
+
+    sid                     VARCHAR(20) NOT NULL UNIQUE COMMENT '會員序號',
+
+    create_date             DATETIME NOT NULL COMMENT '建立日期',
+
+    modify_date             DATETIME NULL COMMENT '最後更新日期',
+
+    parent_mid              VARCHAR(20) NULL COMMENT '上線會員帳號',
+
+    mid                     VARCHAR(20) NOT NULL UNIQUE COMMENT '會員帳號',
+
+    pwd                     VARCHAR(255) NOT NULL COMMENT '登入密碼(加密)',
+
+    password_reset_token    VARCHAR(100) NULL COMMENT '重設密碼Token',
+
+    password_reset_expiry   DATETIME NULL COMMENT 'Token到期時間',
+
+    join_date               DATETIME NULL COMMENT '加入日期',
+
+    continue_date           DATETIME NULL COMMENT '續約日期',
+
+    real_continue_date      DATETIME NULL COMMENT '實際續約日期',
+
+    hint_days               INT DEFAULT 30 NOT NULL COMMENT '提前通知天數',
+
+    birthday                DATETIME NULL COMMENT '生日',
+
+    name                    VARCHAR(50) NULL COMMENT '姓名',
+
+    eng_name                VARCHAR(50) NULL COMMENT '英文姓名',
+
+    head_img                VARCHAR(255) NULL COMMENT '頭像',
+
+    iden                    VARCHAR(255) NULL COMMENT '身份證字號(加密)',
+
+    cmp_code                VARCHAR(10) NULL COMMENT '統一編號',
+
+    role                    VARCHAR(3) NOT NULL COMMENT 'Stc一般會員;Smn直銷商;Ctl管理員',
+
+    is_admin                VARCHAR(2) DEFAULT 'N' COMMENT '是否管理員',
+
+    authorization_page      TEXT NULL COMMENT '授權頁面',
+
+    address                 VARCHAR(500) NULL COMMENT '地址',
+
+    mobile                  VARCHAR(20) NULL COMMENT '手機',
+
+    tel                     VARCHAR(20) NULL COMMENT '電話',
+
+    fax                     VARCHAR(20) NULL COMMENT '傳真',
+
+    email                   VARCHAR(100) NULL COMMENT '電子信箱',
+
+    avalible                VARCHAR(2) NOT NULL DEFAULT 'Y'
+                            COMMENT 'Y可用;D刪除;W停用',
+
+    start_date              DATETIME NULL COMMENT '生效日期',
+
+    signature_pic           VARCHAR(255) NULL COMMENT '簽名圖',
+
+    advertising_id          VARCHAR(200) NULL COMMENT '廣告ID',
+
+    device_id               VARCHAR(200) NULL COMMENT '裝置ID',
+
+    fcm_token               TEXT NULL COMMENT 'FCM推播Token',
+
+    priority                INT NULL COMMENT '權限等級',
+
+    level_name              VARCHAR(50) NULL COMMENT '會員等級',
+
+    notice_enable           VARCHAR(2) DEFAULT 'Y'
+                            COMMENT '是否接收通知',
+
+    last_login_date         DATETIME NULL COMMENT '最後登入時間',
+
+    register_source         VARCHAR(20) NULL
+                            COMMENT 'WEB;APP;ADMIN;IMPORT',
+
+    edit_sid                VARCHAR(20) NULL COMMENT '最後編輯人員',
+
+    cur_coupon              INT DEFAULT 0 COMMENT '目前折價券',
+
+    cur_point               INT DEFAULT 0 COMMENT '目前點數',
+
+    script                  TEXT NULL COMMENT '說明',
+
+    remark                  TEXT NULL COMMENT '備註'
+
+) COMMENT='會員資料表';
+
+CREATE TABLE sys_admin (
+
+    nid                 INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '流水號',
+
+    sid                 VARCHAR(20) NOT NULL UNIQUE COMMENT '管理員序號',
+
+    member_sid          VARCHAR(20) NOT NULL COMMENT '對應會員序號',
+
+    account             VARCHAR(50) NOT NULL UNIQUE COMMENT '登入帳號',
+
+    role                VARCHAR(20) NOT NULL
+                        COMMENT 'SuperAdmin;Admin;Operator',
+
+    create_date         DATETIME NOT NULL COMMENT '建立日期',
+
+    modify_date         DATETIME NULL COMMENT '修改日期',
+
+    avalible            VARCHAR(2) DEFAULT 'Y'
+                        COMMENT 'Y可用;D刪除;W停用',
+
+    remark              TEXT NULL COMMENT '備註'
+
+) COMMENT='系統管理員資料表';
+
+CREATE TABLE data_member_file (
+
+    nid                 INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '流水號',
+
+    sid                 VARCHAR(20) NOT NULL UNIQUE COMMENT '附件序號',
+
+    member_sid          VARCHAR(20) NOT NULL COMMENT '會員序號',
+
+    file_type           VARCHAR(50) NOT NULL
+                        COMMENT 'HEAD_IMG;SIGNATURE;ID_CARD;CONTRACT;OTHER',
+
+    file_name           VARCHAR(255) NOT NULL COMMENT '原始檔名',
+
+    save_file_name      VARCHAR(255) NOT NULL COMMENT '儲存檔名',
+
+    file_path           VARCHAR(500) NOT NULL COMMENT '檔案路徑',
+
+    file_size           BIGINT NULL COMMENT '檔案大小(Byte)',
+
+    create_date         DATETIME NOT NULL COMMENT '建立日期',
+
+    modify_date         DATETIME NULL COMMENT '修改日期',
+
+    avalible            VARCHAR(2) DEFAULT 'Y'
+                        COMMENT 'Y可用;D刪除',
+
+    remark              TEXT NULL COMMENT '備註'
+
+) COMMENT='會員附件資料表';
+
+CREATE TABLE sys_config (
+
+    nid                 INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '流水號',
+
+    config_key          VARCHAR(100) NOT NULL UNIQUE COMMENT '設定鍵值',
+
+    config_name         VARCHAR(100) NOT NULL COMMENT '設定名稱',
+
+    config_value        TEXT NULL COMMENT '設定內容',
+
+    script              TEXT NULL COMMENT '說明',
+
+    create_date         DATETIME NOT NULL COMMENT '建立日期',
+
+    modify_date         DATETIME NULL COMMENT '修改日期'
+
+) COMMENT='系統參數設定表';
+
+CREATE TABLE sys_notice_setting (
+
+    nid                 INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '流水號',
+
+    notice_type         VARCHAR(20) NOT NULL COMMENT '通知類型',
+
+    days_before         INT NOT NULL COMMENT '提前通知天數',
+
+    title               VARCHAR(200) NOT NULL COMMENT '通知標題',
+
+    content             TEXT NOT NULL COMMENT '通知內容',
+
+    avalible            VARCHAR(2) DEFAULT 'Y'
+                        COMMENT '是否啟用',
+
+    create_date         DATETIME NOT NULL COMMENT '建立日期',
+
+    modify_date         DATETIME NULL COMMENT '修改日期'
+
+) COMMENT='到期通知設定表';
+
+CREATE TABLE log_push (
+
+    nid                 INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '流水號',
+
+    member_sid          VARCHAR(20) NOT NULL COMMENT '會員序號',
+
+    push_type           VARCHAR(20) NOT NULL
+                        COMMENT 'FCM;EMAIL;LINE;SMS',
+
+    title               VARCHAR(200) NOT NULL COMMENT '通知標題',
+
+    message             TEXT NOT NULL COMMENT '通知內容',
+
+    send_date           DATETIME NOT NULL COMMENT '發送時間',
+
+    result              VARCHAR(20) NULL COMMENT '發送結果',
+
+    response_message    TEXT NULL COMMENT '回應訊息',
+
+    create_sid          VARCHAR(20) NULL COMMENT '建立人員'
+
+) COMMENT='推播通知紀錄表';
+
+CREATE TABLE log_import (
+
+    nid                 INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '流水號',
+
+    create_date         DATETIME NOT NULL COMMENT '匯入時間',
+
+    create_sid          VARCHAR(20) NOT NULL COMMENT '匯入人員',
+
+    file_name           VARCHAR(255) NOT NULL COMMENT '檔案名稱',
+
+    file_type           VARCHAR(10) NOT NULL COMMENT 'CSV;XLSX',
+
+    total_count         INT DEFAULT 0 COMMENT '總筆數',
+
+    success_count       INT DEFAULT 0 COMMENT '成功筆數',
+
+    fail_count          INT DEFAULT 0 COMMENT '失敗筆數',
+
+    remark              TEXT NULL COMMENT '備註'
+
+) COMMENT='會員匯入紀錄表';
+
+CREATE TABLE log_export (
+
+    nid                 INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '流水號',
+
+    create_date         DATETIME NOT NULL COMMENT '匯出時間',
+
+    create_sid          VARCHAR(20) NOT NULL COMMENT '匯出人員',
+
+    file_name           VARCHAR(255) NOT NULL COMMENT '檔案名稱',
+
+    file_type           VARCHAR(10) NOT NULL COMMENT 'CSV;XLSX',
+
+    total_count         INT DEFAULT 0 COMMENT '匯出筆數',
+
+    search_condition    TEXT NULL COMMENT '查詢條件'
+
+) COMMENT='會員匯出紀錄表';
+
+CREATE TABLE log_action (
+
+    nid                 INT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '流水號',
+
+    create_date         DATETIME NOT NULL COMMENT '操作時間',
+
+    admin_sid           VARCHAR(20) NOT NULL COMMENT '管理員序號',
+
+    admin_account       VARCHAR(50) NOT NULL COMMENT '管理員帳號',
+
+    action_type         VARCHAR(50) NOT NULL COMMENT '操作類型',
+
+    target_sid          VARCHAR(20) NULL COMMENT '目標資料序號',
+
+    page_name           VARCHAR(100) NULL COMMENT '操作頁面',
+
+    ip                  VARCHAR(50) NULL COMMENT 'IP位址',
+
+    user_agent          VARCHAR(255) NULL COMMENT '瀏覽器資訊',
+
+    description         TEXT NULL COMMENT '操作內容'
+
+) COMMENT='系統操作紀錄表';
+";
 
                         // 執行建表 SQL
                         db.Database.ExecuteSqlRaw(createTableSql);

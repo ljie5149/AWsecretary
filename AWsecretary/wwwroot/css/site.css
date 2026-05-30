@@ -10,6 +10,11 @@
     font-family: "Poppins", serif;
 }
 
+/* CSS 變數：預設側邊欄寬度，會被 body.sidebar-collapsed 覆寫 */
+:root {
+    --sidebar-width: 260px;
+}
+
 html {
     font-size: 14px;
     position: relative;
@@ -24,6 +29,11 @@ html {
 
 body {
     margin-bottom: 60px;
+}
+
+/* 當側邊欄被收合時，透過切換 body 類別來改變變數（JS 會控制） */
+body.sidebar-collapsed {
+    --sidebar-width: 85px;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
@@ -365,7 +375,7 @@ body {
     position: fixed;
     top: 0;
     right: 0;
-    left: var(--sidebar-width, 260px); /* 寬度根據側邊欄動態調整 */
+    left: var(--sidebar-width, 260px); /* 寬度根據側邊欄動態調整（使用變數） */
     height: 70px;
     background-color: #ffffff;
     border-bottom: 1px solid #e2e8f0;
@@ -377,9 +387,9 @@ body {
     transition: left 0.4s ease;
 }
 
-/* 當側邊欄收合時，頂部列要自動向左延展 */
-.sidebar.collapsed ~ .topbar {
-    left: 85px;
+/* 如果需要更直接的覆寫也可使用下列選擇子（但已由變數處理） */
+body.sidebar-collapsed .topbar {
+    left: var(--sidebar-width, 85px);
 }
 
 .topbar-left {
@@ -456,24 +466,14 @@ body {
     padding-top: calc(70px + 24px) !important; /* 70px頂部列高度 + 24px留白 */
 }
 
-@media (max-width: 768px) {
-    .topbar {
-        left: 0 !important; /* 手機版頂部列滿版 */
-    }
-}
-/* ==========================================================================
-   主內容(Main) 與側邊欄的同步位移控制（新增）
-   - 利用相鄰選擇子讓 main-content 隨 .sidebar 的寬度改變
-   - 保留平滑過渡且在小螢幕下恢復為覆蓋模式
-   ========================================================================== */
-/* 預設主內容保留側邊欄寬度的左側間距，避免被側邊欄蓋住 */
+/* 使用變數來控制主內容左側間距，當 body.sidebar-collapsed 時變數會被改寫，自動生效 */
 .main-content {
     transition: margin-left 0.4s ease, transform 0.4s ease;
-    margin-left: 260px;
+    margin-left: var(--sidebar-width, 260px);
     padding: 24px;
 }
 
-/* 當側邊欄收合時，主內容縮小左側間距 */
+/* 為舊有選擇子保留容錯規則（可視需求保留或移除） */
 .sidebar.collapsed + .main-content,
 .sidebar.collapsed ~ .main-content {
     margin-left: 85px;

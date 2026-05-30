@@ -153,10 +153,18 @@
         });
 
         // 為側邊欄收合與手機版選單按鈕綁定事件
+        const updateBodySidebarState = () => {
+            const sidebar = document.querySelector(".sidebar");
+            if (!sidebar) return;
+            document.body.classList.toggle("sidebar-collapsed", sidebar.classList.contains("collapsed"));
+        };
+
         document.querySelectorAll(".sidebar-toggler, .sidebar-menu-button").forEach(button => {
             button.addEventListener("click", () => {
                 closeAllDropdowns();
                 document.querySelector(".sidebar").classList.toggle("collapsed");
+                // 同步更新 body 類別
+                updateBodySidebarState();
             });
         });
 
@@ -168,6 +176,9 @@
                     toggleDropdown(dropdown, menu, true);
                 }
             });
+
+            // 同步 body sidebar 狀態（若 server-side 已設 collapsed）
+            updateBodySidebarState();
         });
     </script>
 

@@ -85,7 +85,7 @@ body {
         background: #d9e1fd;
     }
 
-/* 【收合時】：按鈕移至下一列，與上方 Logo 保持 85px 的舒適 top 距離 */
+    /* 【收合時】：按鈕移至下一列，與上方 Logo 保持 85px 的舒適 top 距離 */
 .sidebar.collapsed .sidebar-header .sidebar-toggler {
     top: 0;
     transform: translate(-4px, 85px) rotate(180deg) !important;
@@ -316,7 +316,7 @@ body {
     transition: all 0.4s ease; /* 完美配合你 JS 的 0.4s 縮放動畫時間 */
 }
 
-    /* 【展開狀態】預設顯示完整版權文字 */
+    /* 【展開狀態】預設顯示完整版（例如 "Version 1.0.0"）*/
     .sidebar-footer .full-copyright {
         display: block;
         opacity: 1;
@@ -355,6 +355,39 @@ body {
     .sidebar.collapsed {
         width: 260px;
         left: -260px;
+    }
+}
+
+/* ==========================================================================
+   主內容(Main) 與側邊欄的同步位移控制（新增）
+   - 利用相鄰選擇子讓 main-content 隨 .sidebar 的寬度改變
+   - 保留平滑過渡且在小螢幕下恢復為覆蓋模式
+   ========================================================================== */
+/* 預設主內容保留側邊欄寬度的左側間距，避免被側邊欄蓋住 */
+.main-content {
+    transition: margin-left 0.4s ease, transform 0.4s ease;
+    margin-left: 260px;
+    padding: 24px;
+}
+
+/* 當側邊欄收合時，主內容縮小左側間距 */
+.sidebar.collapsed + .main-content,
+.sidebar.collapsed ~ .main-content {
+    margin-left: 85px;
+}
+
+/* 明確指定展開時的間距（容錯） */
+.sidebar + .main-content,
+.sidebar ~ .main-content {
+    margin-left: 260px;
+}
+
+/* 小螢幕下側邊欄以覆蓋方式顯示，主內容回到 0 */
+@media (max-width: 768px) {
+    .sidebar + .main-content,
+    .sidebar.collapsed + .main-content,
+    .sidebar ~ .main-content {
+        margin-left: 0;
     }
 }
 
@@ -406,7 +439,7 @@ body {
         visibility: hidden;
     }
 
-/* 縮小收合狀態下的 Footer 樣式切換 */
+ /* 縮小收合狀態下的 Footer 樣式切換 */
 .sidebar.collapsed .sidebar-footer {
     padding: 18px 0;
     display: flex;

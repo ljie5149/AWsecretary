@@ -53,47 +53,209 @@
 
         <nav class="sidebar-nav">
             <ul class="nav-list primary-nav">
+
+
+                <!-- 首頁儀表板 -->
                 <li class="nav-item @(IsActive("Home", "Index") ? "active" : "")">
                     <a asp-controller="Home" asp-action="Index" class="nav-link">
-                        <span class="bi bi-grid-1x2"></span>
-                        <span class="nav-label">首頁備忘錄</span>
+                        <span class="bi bi-speedometer2"></span>
+                        <span class="nav-label">首頁儀表板</span>
                     </a>
                 </li>
 
+                <!-- 會員管理 -->
                 @{
                     // 檢查目前的 Controller 是否為 Member
                     bool isMemberController = ViewContext.RouteData.Values["Controller"]?.ToString() == "Member";
                 }
-                <li class="nav-item dropdown-container @(isMemberController ? "open" : "")"
-                    data-default-open="@(isMemberController ? "true" : "false")"
-                    data-key="dropdown-member">
+                <li class="nav-item dropdown-container @(isMemberController ? "open" : "")">
                     <a href="#" class="nav-link dropdown-toggle">
-                        <span class="bi bi-person"></span>
+                        <span class="bi bi-people"></span>
                         <span class="nav-label">會員管理</span>
                         <span class="bi bi-chevron-down dropdown-icon"></span>
                     </a>
+
                     <ul class="dropdown-menu">
-                        <li class="nav-item">
-                            <a class="nav-link dropdown-title">會員管理</a>
-                        </li>
+
                         <li class="nav-item @(IsActive("Member", "List") ? "active" : "")">
-                            <a asp-controller="Member" asp-action="List" class="nav-link dropdown-link">會員列表</a>
+                            <a asp-controller="Member" asp-action="List"
+                               class="nav-link dropdown-link">
+                                會員列表
+                            </a>
                         </li>
+
+                        <li class="nav-item @(IsActive("Member", "Create") ? "active" : "")">
+                            <a asp-controller="Member" asp-action="Create"
+                               class="nav-link dropdown-link">
+                                新增會員
+                            </a>
+                        </li>
+
+                        <li class="nav-item @(IsActive("Member", "ImportExport") ? "active" : "")">
+                            <a asp-controller="Member" asp-action="ImportExport"
+                               class="nav-link dropdown-link">
+                                匯入 / 匯出
+                            </a>
+                        </li>
+
+                        <li class="nav-item @(IsActive("Member", "ExpireNotice") ? "active" : "")">
+                            <a asp-controller="Member" asp-action="ExpireNotice"
+                               class="nav-link dropdown-link">
+                                到期通知
+                            </a>
+                        </li>
+
                     </ul>
                 </li>
+
+
+                <!-- 組織圖 -->
+                <li class="nav-item">
+                    <a asp-controller="Organization" asp-action="Index"
+                       class="nav-link">
+                        <span class="bi bi-diagram-3"></span>
+                        <span class="nav-label">組織圖</span>
+                    </a>
+                </li>
+
+                <!-- 業績管理 -->
+                @* <li class="nav-item dropdown-container">
+                    <a href="#" class="nav-link dropdown-toggle">
+                        <span class="bi bi-graph-up-arrow"></span>
+                        <span class="nav-label">業績管理</span>
+                        <span class="bi bi-chevron-down dropdown-icon"></span>
+                    </a>
+
+                    <ul class="dropdown-menu">
+
+                        <li class="nav-item">
+                            <a asp-controller="Performance"
+                               asp-action="Dashboard"
+                               class="nav-link dropdown-link">
+                                業績總覽
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a asp-controller="Performance"
+                               asp-action="Report"
+                               class="nav-link dropdown-link">
+                                業績報表
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a asp-controller="Performance"
+                               asp-action="Ranking"
+                               class="nav-link dropdown-link">
+                                業績排行
+                            </a>
+                        </li>
+
+                    </ul>
+                </li> *@
+
+                <!-- 獎金管理 -->
+                @* <li class="nav-item dropdown-container">
+                    <a href="#" class="nav-link dropdown-toggle">
+                        <span class="bi bi-cash-stack"></span>
+                        <span class="nav-label">獎金管理</span>
+                        <span class="bi bi-chevron-down dropdown-icon"></span>
+                    </a>
+
+                    <ul class="dropdown-menu">
+
+                        <li class="nav-item">
+                            <a asp-controller="Bonus"
+                               asp-action="Dashboard"
+                               class="nav-link dropdown-link">
+                                獎金總覽
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a asp-controller="Bonus"
+                               asp-action="Report"
+                               class="nav-link dropdown-link">
+                                獎金報表
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a asp-controller="Bonus"
+                               asp-action="Setting"
+                               class="nav-link dropdown-link">
+                                獎金設定
+                            </a>
+                        </li>
+
+                    </ul>
+                </li> *@
+
+                <!-- 報表中心 -->
+                @* <li class="nav-item dropdown-container">
+                    <a href="#" class="nav-link dropdown-toggle">
+                        <span class="bi bi-file-earmark-bar-graph"></span>
+                        <span class="nav-label">報表中心</span>
+                        <span class="bi bi-chevron-down dropdown-icon"></span>
+                    </a>
+
+                    <ul class="dropdown-menu">
+
+                        <li class="nav-item">
+                            <a asp-controller="Report"
+                               asp-action="Member"
+                               class="nav-link dropdown-link">
+                                會員報表
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a asp-controller="Report"
+                               asp-action="Organization"
+                               class="nav-link dropdown-link">
+                                組織報表
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a asp-controller="Report"
+                               asp-action="Performance"
+                               class="nav-link dropdown-link">
+                                業績報表
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a asp-controller="Report"
+                               asp-action="Bonus"
+                               class="nav-link dropdown-link">
+                                獎金報表
+                            </a>
+                        </li>
+
+                    </ul>
+                </li> *@
             </ul>
 
             <ul class="nav-list secondary-nav">
+                <!-- 系統設定 -->
                 <li class="nav-item">
-                    <a asp-controller="Home" asp-action="Support" class="nav-link">
+                    <a asp-controller="System"
+                       asp-action="Index"
+                       class="nav-link">
                         <span class="bi bi-gear"></span>
-                        <span class="nav-label">Support</span>
+                        <span class="nav-label">系統設定</span>
                     </a>
                 </li>
+
+                <!-- 操作紀錄 -->
                 <li class="nav-item">
-                    <a asp-controller="Account" asp-action="SignOut" class="nav-link">
-                        <span class="bi bi-box-arrow-left"></span>
-                        <span class="nav-label">Sign Out</span>
+                    <a asp-controller="Log"
+                       asp-action="Index"
+                       class="nav-link">
+                        <span class="bi bi-journal-text"></span>
+                        <span class="nav-label">操作紀錄</span>
                     </a>
                 </li>
             </ul>

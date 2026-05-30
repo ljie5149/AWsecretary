@@ -39,7 +39,7 @@
         <span class="bi bi-list"></span>
     </button>
 
-    <aside class="sidebar">
+    <aside class="sidebar" data-key="sidebar">
         <header class="sidebar-header">
             <a asp-controller="Home" asp-action="Index" class="header-logo">
                 <img src="https://res.cloudinary.com/zenbusiness/image/upload/v1670445040/logaster/logaster-2013-06-jpg.png"
@@ -64,7 +64,9 @@
                     // 檢查目前的 Controller 是否為 Member
                     bool isMemberController = ViewContext.RouteData.Values["Controller"]?.ToString() == "Member";
                 }
-                <li class="nav-item dropdown-container @(isMemberController ? "open" : "")" data-default-open="@(isMemberController ? "true" : "false")">
+                <li class="nav-item dropdown-container @(isMemberController ? "open" : "")"
+                    data-default-open="@(isMemberController ? "true" : "false")"
+                    data-key="dropdown-member">
                     <a href="#" class="nav-link dropdown-toggle">
                         <span class="bi bi-person"></span>
                         <span class="nav-label">會員管理</span>
